@@ -6,7 +6,10 @@ import 'package:flutter/foundation.dart';
 
 import 'media_service_interface.dart';
 
-MediaService getMediaService() => const _WebOSMediaService();
+MediaService getMediaService() {
+  debugPrint('[media] Using WebOS MediaService');
+  return const _WebOSMediaService();
+}
 
 class _WebOSMediaService extends MediaService {
   const _WebOSMediaService();

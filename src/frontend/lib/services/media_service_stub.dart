@@ -4,7 +4,10 @@ import 'package:flutter/foundation.dart';
 
 import 'media_service_interface.dart';
 
-MediaService getMediaService() => const _StubMediaService();
+MediaService getMediaService() {
+  debugPrint('[media] Using STUB MediaService (NOT webOS)');
+  return const _StubMediaService();
+}
 
 class _StubMediaService extends MediaService {
   const _StubMediaService();
