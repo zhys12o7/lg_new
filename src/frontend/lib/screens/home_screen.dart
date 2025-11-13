@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/services/media_service.dart';
 import 'package:frontend/services/volume_service.dart';
 import 'package:frontend/widgets/custom_video_widget.dart';
 
@@ -242,6 +243,10 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
   int _volume = 15;
   bool _muted = false;
   bool _loading = false;
+  bool _openingMedia = false;
+  String? _mediaSessionId;
+
+  final MediaService _mediaService = mediaService;
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +336,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: Text(
                               'An American expat tries to sell off his highly profitable marijuana '
                               'empire in London, triggering plots, schemes, bribery and blackmail in '
@@ -349,10 +354,34 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
-                            children: const [
-                              _WatchNowButton(),
-                              SizedBox(height: 22),
-                              Wrap(
+                            children: [
+                              FilledButton(
+                                onPressed: _openingMedia ? null : _launchNativePlayback,
+                                style: FilledButton.styleFrom(
+                                  backgroundColor: const Color(0xFFE53935),
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(22),
+                                  ),
+                                  textStyle: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                child: _openingMedia
+                                    ? const SizedBox(
+                                        height: 18,
+                                        width: 18,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                                        ),
+                                      )
+                                    : const Text('지금 보러가기'),
+                              ),
+                              const SizedBox(height: 22),
+                              const Wrap(
                                 spacing: 14,
                                 runSpacing: 12,
                                 children: [
@@ -413,6 +442,46 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
     );
+  }
+
+  Future<void> _launchNativePlayback() async {
+    if (_openingMedia) {
+      return;
+    }
+    setState(() => _openingMedia = true);
+    try {
+      final sessionId = await _mediaService.open(widget.videoUrl);
+      if (!mounted) {
+        return;
+      }
+      if (sessionId == null) {
+        _showMessage('영상 재생을 시작하지 못했어요.');
+      } else {
+        _mediaSessionId = sessionId;
+        await _mediaService.play(sessionId);
+        if (mounted) {
+          _showMessage('TV에서 영상 재생을 시작했어요.');
+        }
+      }
+    } catch (error) {
+      debugPrint('[media] open/play error: $error');
+      if (mounted) {
+        _showMessage('영상 재생 중 오류가 발생했어요.');
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _openingMedia = false);
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    if (_mediaSessionId != null) {
+      _mediaService.close(_mediaSessionId!);
+      _mediaSessionId = null;
+    }
+    super.dispose();
   }
 }
 
@@ -495,27 +564,6 @@ class _VolumeControllerBar extends StatelessWidget {
         ),
         child: Icon(icon, size: 20, color: Colors.white),
       ),
-    );
-  }
-}
-
-class _WatchNowButton extends StatelessWidget {
-  const _WatchNowButton();
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () {},
-      style: FilledButton.styleFrom(
-        backgroundColor: const Color(0xFFE53935),
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 18),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(22),
-        ),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-      ),
-      child: const Text('지금 보러가기'),
     );
   }
 }
