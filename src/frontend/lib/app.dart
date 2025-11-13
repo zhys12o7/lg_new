@@ -104,7 +104,7 @@ class _SplashHomeState extends State<SplashHome>
                 height: 6,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(4),
-                  color: color.primary.withValues(alpha: 0.7),
+                  color: color.primary.withOpacity(0.7),
                 ),
               ),
             ],

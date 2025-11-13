@@ -188,7 +188,7 @@ class _ProfileSummary extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: Colors.black.withOpacity(0.04),
             blurRadius: 20,
             offset: const Offset(0, 12),
           ),
@@ -252,7 +252,7 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
         borderRadius: BorderRadius.circular(36),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 34,
             offset: const Offset(0, 28),
           ),
@@ -284,8 +284,8 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
                             begin: Alignment.centerRight,
                             end: Alignment.centerLeft,
                             colors: [
-                              Colors.black.withValues(alpha: 0.55),
-                              Colors.black.withValues(alpha: 0.25),
+                              Colors.black.withOpacity(0.55),
+                              Colors.black.withOpacity(0.25),
                               Colors.transparent,
                             ],
                           ),
@@ -312,48 +312,63 @@ class _HeroSpotlightState extends State<_HeroSpotlight> {
           const SizedBox(width: 30),
           Expanded(
             flex: 5,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(minHeight: 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: const [
-                  Text(
-                    'THE GENTLEMEN',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF181A21),
-                    ),
-                  ),
-                  SizedBox(height: 18),
-                  Expanded(
-                    child: Text(
-                      'An American expat tries to sell off his highly profitable marijuana '
-                      'empire in London, triggering plots, schemes, bribery and blackmail in '
-                      'an attempt to steal his domain out from under him.',
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'THE GENTLEMEN',
                       style: TextStyle(
-                        fontSize: 15,
-                        height: 1.7,
-                        color: Color(0xFF4C505C),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Color(0xFF181A21),
                       ),
                     ),
-                  ),
-                  SizedBox(height: 26),
-                  _WatchNowButton(),
-                  SizedBox(height: 26),
-                  Wrap(
-                    spacing: 14,
-                    runSpacing: 12,
-                    children: [
-                      _TagChip(label: '액션'),
-                      _TagChip(label: '코미디'),
-                      _TagChip(label: '영국'),
-                    ],
-                  ),
-                ],
-              ),
+                    const SizedBox(height: 16),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'An American expat tries to sell off his highly profitable marijuana '
+                              'empire in London, triggering plots, schemes, bribery and blackmail in '
+                              'an attempt to steal his domain out from under him.',
+                              style: TextStyle(
+                                fontSize: 15,
+                                height: 1.6,
+                                color: Color(0xFF4C505C),
+                              ),
+                              maxLines: 5,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: const [
+                              _WatchNowButton(),
+                              SizedBox(height: 22),
+                              Wrap(
+                                spacing: 14,
+                                runSpacing: 12,
+                                children: [
+                                  _TagChip(label: '액션'),
+                                  _TagChip(label: '코미디'),
+                                  _TagChip(label: '영국'),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
+              },
             ),
           ),
         ],
@@ -420,7 +435,7 @@ class _VolumeControllerBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.45),
+        color: Colors.black.withOpacity(0.45),
         borderRadius: BorderRadius.circular(22),
       ),
       child: Padding(
@@ -476,7 +491,7 @@ class _VolumeControllerBar extends StatelessWidget {
         height: 36,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: onTap == null ? 0.25 : 0.4),
+          color: Colors.white.withOpacity(onTap == null ? 0.25 : 0.4),
         ),
         child: Icon(icon, size: 20, color: Colors.white),
       ),
@@ -560,7 +575,7 @@ class _MemoBoard extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 28,
             offset: const Offset(0, 22),
           ),
@@ -630,7 +645,7 @@ class _MemoSticky extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 18,
             offset: const Offset(0, 14),
           ),
@@ -680,7 +695,7 @@ class _VerticalBadge extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
+            color: Colors.black.withOpacity(0.2),
             blurRadius: 30,
             offset: const Offset(12, 18),
           ),
@@ -730,7 +745,7 @@ class _AppDock extends StatelessWidget {
         borderRadius: BorderRadius.circular(32),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withOpacity(0.08),
             blurRadius: 28,
             offset: const Offset(0, 24),
           ),
@@ -777,8 +792,8 @@ class _DockIcon extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                item.color.withValues(alpha: 0.18),
-                item.color.withValues(alpha: 0.32),
+                item.color.withOpacity(0.18),
+                item.color.withOpacity(0.32),
               ],
             ),
             borderRadius: BorderRadius.circular(22),
