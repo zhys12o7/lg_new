@@ -4,11 +4,11 @@
 
 import 'dart:async';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:frontend/webos_service_helper/utils.dart' as webos_utils;
 
 /// webOS Luna Service 기반 시계 컨트롤러
 ///
-/// 역할: webOS의 System Service를 사용하여 시스템 시간을 가져옴
+/// 역할: webOS의 System Service를 사용하여 시스템 시간을 가져옴 (WebOSServiceBridge)
 /// - luna://com.webos.service.systemservice/time/getSystemTime 사용
 /// - 시간대 변경 시 자동 업데이트
 /// - UTC 및 로컬 시간 모두 지원
@@ -17,7 +17,7 @@ import 'package:flutter/services.dart';
 /// 1. webOS 배포 시 clock_widget.dart에서 import 변경
 /// 2. ClockController 대신 ClockControllerWebOS 사용
 class ClockControllerWebOS extends ChangeNotifier {
-  static const platform = MethodChannel('com.lg.homescreen/luna');
+  int? _subscriptionHashCode;
 
   DateTime _currentTime = DateTime.now();
   String _timezone = 'Unknown';
@@ -36,31 +36,26 @@ class ClockControllerWebOS extends ChangeNotifier {
     if (_isSubscribed) return;
 
     try {
-      // Luna Service 호출
-      final result = await platform.invokeMethod('callLunaService', {
-        'service': 'luna://com.webos.service.systemservice',
-        'method': 'time/getSystemTime',
-        'parameters': {'subscribe': true},
-      });
+      debugPrint('[Luna API] 구독: luna://com.webos.service.systemservice/time/getSystemTime');
 
-      _handleTimeResponse(result);
+      _subscriptionHashCode = webos_utils.subscribe(
+        uri: 'luna://com.webos.service.systemservice',
+        method: 'time/getSystemTime',
+        payload: {'subscribe': true},
+        onComplete: (response) {
+          _handleTimeResponse(response);
+        },
+        onError: (error) {
+          debugPrint('[Luna API] ❌ 구독 에러: $error');
+        },
+      );
+
       _isSubscribed = true;
-
-      // 구독 응답을 계속 받기 위한 이벤트 리스너 설정
-      platform.setMethodCallHandler(_onLunaServiceEvent);
+      debugPrint('[Luna API] ✅ 구독 성공');
     } catch (e) {
-      debugPrint('Luna Service 호출 실패: $e');
-      // 실패 시 일반 Timer 사용
+      debugPrint('[Luna API] ❌ 에러: $e - Timer로 대체');
       _fallbackToTimer();
     }
-  }
-
-  /// Luna Service 이벤트 핸들러
-  Future<dynamic> _onLunaServiceEvent(MethodCall call) async {
-    if (call.method == 'onTimeUpdate') {
-      _handleTimeResponse(call.arguments);
-    }
-    return null;
   }
 
   /// Luna Service 응답 처리
@@ -97,7 +92,7 @@ class ClockControllerWebOS extends ChangeNotifier {
         notifyListeners();
       }
     } catch (e) {
-      debugPrint('시간 응답 파싱 오류: $e');
+      debugPrint('[Luna API] ❌ 응답 파싱 오류: $e');
     }
   }
 
@@ -111,13 +106,15 @@ class ClockControllerWebOS extends ChangeNotifier {
 
   /// 구독 중지
   Future<void> stopLunaService() async {
-    if (!_isSubscribed) return;
+    if (!_isSubscribed || _subscriptionHashCode == null) return;
 
     try {
-      await platform.invokeMethod('cancelLunaService');
+      webos_utils.cancel(_subscriptionHashCode!);
       _isSubscribed = false;
+      _subscriptionHashCode = null;
+      debugPrint('[Luna API] 구독 중지');
     } catch (e) {
-      debugPrint('Luna Service 취소 실패: $e');
+      debugPrint('[Luna API] ❌ 구독 취소 실패: $e');
     }
   }
 

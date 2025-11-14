@@ -1,26 +1,20 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+import 'package:frontend/webos_service_helper/utils.dart' as webos_utils;
 
 import 'media_service_interface.dart';
 
 MediaService getMediaService() {
-  debugPrint('[media] Using Native webOS MediaService (MethodChannel)');
+  debugPrint('[MediaService] WebOSServiceBridge 사용');
   return const _NativeWebOSMediaService();
 }
 
 class _NativeWebOSMediaService extends MediaService {
   const _NativeWebOSMediaService();
 
-  static const platform = MethodChannel('com.lg.homescreen/luna');
-
   @override
   Future<String?> open(String uri, {Map<String, dynamic>? options}) async {
-    final timestamp = DateTime.now().toString();
-    debugPrint('[media] [$timestamp] open() called via MethodChannel');
-    debugPrint('[media] [$timestamp] uri: $uri');
-
     try {
       final parameters = <String, dynamic>{
         'uri': uri,
@@ -34,28 +28,24 @@ class _NativeWebOSMediaService extends MediaService {
         parameters.addAll(options);
       }
 
-      debugPrint('[media] [$timestamp] Calling Luna Service: luna://com.webos.media');
-      debugPrint('[media] [$timestamp] Method: open');
-      debugPrint('[media] [$timestamp] Parameters: $parameters');
+      debugPrint('[Luna API] 호출: luna://com.webos.media/open');
 
-      final result = await platform.invokeMethod('callLunaService', {
-        'service': 'luna://com.webos.media',
-        'method': 'open',
-        'parameters': parameters,
-      });
+      final result = await webos_utils.callOneReply(
+        uri: 'luna://com.webos.media',
+        method: 'open',
+        payload: parameters,
+      );
 
-      debugPrint('[media] [$timestamp] Luna Service response: $result');
-
-      if (result != null && result is Map) {
+      if (result != null && result['returnValue'] == true) {
         final sessionId = result['sessionId'] as String?;
-        debugPrint('[media] [$timestamp] sessionId: $sessionId');
+        debugPrint('[Luna API] ✅ 성공 - sessionId: $sessionId');
         return sessionId;
       }
 
-      debugPrint('[media] [$timestamp] No sessionId in response');
+      debugPrint('[Luna API] ❌ 실패 - returnValue: ${result?['returnValue']}');
       return null;
     } catch (e) {
-      debugPrint('[media] [$timestamp] open FAILED: $e');
+      debugPrint('[Luna API] ❌ 에러: $e');
       return null;
     }
   }
@@ -73,19 +63,22 @@ class _NativeWebOSMediaService extends MediaService {
   Future<void> close(String sessionId) => _invokeSimple('close', sessionId);
 
   Future<void> _invokeSimple(String method, String sessionId) async {
-    final timestamp = DateTime.now().toString();
-    debugPrint('[media] [$timestamp] $method() called with sessionId: $sessionId');
-
     try {
-      await platform.invokeMethod('callLunaService', {
-        'service': 'luna://com.webos.media',
-        'method': method,
-        'parameters': {'sessionId': sessionId},
-      });
+      debugPrint('[Luna API] 호출: luna://com.webos.media/$method');
 
-      debugPrint('[media] [$timestamp] $method SUCCESS');
+      final result = await webos_utils.callOneReply(
+        uri: 'luna://com.webos.media',
+        method: method,
+        payload: {'sessionId': sessionId},
+      );
+
+      if (result != null && result['returnValue'] == true) {
+        debugPrint('[Luna API] ✅ $method 성공');
+      } else {
+        debugPrint('[Luna API] ❌ $method 실패');
+      }
     } catch (e) {
-      debugPrint('[media] [$timestamp] $method FAILED: $e');
+      debugPrint('[Luna API] ❌ $method 에러: $e');
     }
   }
 }

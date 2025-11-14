@@ -35,6 +35,11 @@ dependencies:
   http: ^1.1.0
   provider: ^6.0.5
   google_fonts: ^6.1.0
+  webos_service_bridge:
+    git:
+      url: https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git
+      path: plugins/packages/webos_service_bridge
+      ref: main
 
 
   # The following adds the Cupertino Icons font to your application.

@@ -405,6 +405,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  webos_service_bridge:
+    dependency: "direct main"
+    description:
+      path: "plugins/packages/webos_service_bridge"
+      ref: main
+      resolved-ref: c1979622eacfa4496dd224ee8e77c83d8d8df368
+      url: "https://github.com/LGE-Univ-Sogang/flutter-webos-sdk.git"
+    source: git
+    version: "1.2.5"
   xdg_directories:
     dependency: transitive
     description:
